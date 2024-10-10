@@ -1,0 +1,237 @@
+
+
+@import url('https://fonts.googleapis.com/css2?family=Jersey+10&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+    list-style: none;
+}
+body{
+    font-family: 'Poppins', sans-serif;
+}
+
+.container  {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    background-image: 
+        url(/images/auto2.jpg);
+        background-size: cover;
+        background-position: center bottom;
+        background-repeat: no-repeat;
+        min-height: 90vh;
+    
+        display: flex;
+        align-items: center;
+}
+
+.menu{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+}
+
+.menu .navbar ul li{
+    position: relative;
+    float: left;
+}
+
+.menu .navbar ul li a {
+    font-size: 18px;
+    padding: 20px;
+    color: #DAA520;
+    display: block;
+    font-weight: 600;
+}
+.menu .navbar ul li a:hover{
+    color: #8a8326;
+
+}
+
+#menu {
+    display: none;
+}
+
+.menu-icono {
+    width: 25px;
+}
+
+.menu label {
+    cursor: pointer;
+    display: none;
+}
+
+.header-content{
+    text-align: center;
+
+}
+
+.header-content h1{
+    font-size: 78px;
+    line-height: 80px;
+    color: #DAA520;
+    text-transform: uppercase;
+    margin-bottom: 35px;
+    text-shadow: 2px 2px 4px black; 
+}
+
+.header-content p {
+    font-size: 30px;
+    color: #f7e6e6;
+    padding: 0 250px;
+    margin-bottom: 25px;
+    text-shadow: 2px 2px 4px black; 
+}
+
+.banner {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   padding: 95px;
+   
+  
+}
+.banner img {
+   width: 47%;
+   height: auto;
+}
+.banner-text {
+   width: 50%;
+   padding-left: 20px;
+}
+.banner-text h1 {
+   font-size: 2em;
+   margin-bottom: 10px;
+}
+.banner-text p {
+   font-size: 19px;
+   line-height: 1.5;
+   margin:px;
+}
+
+
+h2 {
+   font-size: 35px;
+   line-height: 70px;
+   color: #DAA520;
+   text-transform: uppercase;
+   margin-bottom: 10px;
+}
+
+p{
+   color: #eeebeb;
+   font-size: 15px;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+footer{ 
+    background-color: rgb(0, 0, 0);
+ }
+ .footerContainer{
+    width: 100%;
+    padding: 70px 30px 20px ;
+ }
+ .socialIcons{
+    display: flex;
+    justify-content: center;
+ }
+ .socialIcons a{
+    text-decoration: none;
+    padding:  10px;
+    background-color: white;
+    margin: 10px;
+    border-radius: 50%;
+ }
+ .socialIcons a i{
+    font-size: 2em;
+    color: black;
+    opacity: 0,9;
+ }
+  Hover affect on social media icon 
+  .socialIcons a:hover{
+    background-color: #111;
+    transition: 0.5s;
+ }
+ .socialIcons a:hover i{
+    color: white;
+    transition: 0.5s;
+ }
+ .footerNav{
+    margin: 30px 0;
+ }
+ .footerNav ul{
+    display: flex;
+    justify-content: center;
+    list-style-type: none;
+ }
+ .footerNav ul li a{
+    color:white;
+    margin: 20px;
+    text-decoration: none;
+    font-size: 1.3em;
+    opacity: 0.7;
+    transition: 0.5s;
+ 
+ }
+ .footerNav ul li a:hover{
+    opacity: 1;
+ }
+ .footerBottom{
+    background-color: #000;
+    padding: 10px;
+    text-align: center;
+ }
+ .footerBottom p{
+    color: white;
+ }
+ .designer{
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 400;
+    margin: 0px 5px;
+ }
+ @media (max-width: 700px){
+    .footerNav ul{
+        flex-direction: column;
+    } 
+    .footerNav ul li{
+        width:100%;
+        text-align: center;
+        margin: 10px;
+    }
+    .socialIcons a{
+        padding: 8px;
+        margin: 4px;
+    }
+ } 
