@@ -42,12 +42,21 @@ const showServicio = (req, res) => {
 
 // //// METODO POST  ////
 const storeServicio = (req, res) => {
+    console.log(req.file);
+    let imageName = "";
+
+    if(req.file){
+        imageName = req.file.filename;
+    }
+
     const {nombre_servicio, descripcion, fecha_alta_servicio} = req.body;
-    const sql = "INSERT INTO servicios (nombre_servicio, descripcion, fecha_alta_servicio) VALUES (?,?,?)";
-    db.query(sql,[nombre_servicio, descripcion, fecha_alta_servicio], (error, result) => {
+
+    const sql = "INSERT INTO servicios (nombre_servicio, descripcion, fecha_alta_servicio, imagen) VALUES (?,?,?,?)";
+
+    db.query(sql,[nombre_servicio, descripcion, fecha_alta_servicio, imageName], (error, result) => {
         console.log(result);
         if(error){
-            return res.status(500).json({error : "ERROR: Intente mas tarde por favor"});
+            return res.status(500).json({error : "ERROR: Intente mas tarde por favor"}); // ERROR DE SINTAXIS //
         }
         const servicio = {...req.body, id: result.insertId}; // ... reconstruir el objeto del body
         res.status(201).json(servicio); // muestra creado con exito el elemento
