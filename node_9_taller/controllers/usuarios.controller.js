@@ -59,12 +59,12 @@ const storeUsuario = (req, res) => {
         imageName = req.file.filename;
     };
 
-    const {nombre_usuario, apellido_usuario, telefono, correo_electronico, fecha_nacimiento, fecha_registro,  password, imagen,  id_genero, id_rol, id_localidad} = req.body;
+    const {nombre_usuario, apellido_usuario, correo_electronico, telefono, fecha_nacimiento, fecha_registro,  password, imagen,  id_genero, id_rol, id_localidad} = req.body;
 
-    const sql = "INSERT INTO usuarios (nombre_usuario, apellido_usuario, telefono, correo_electronico, fecha_nacimiento, fecha_registro,  password, imagen,  id_genero, id_rol, id_localidad) VALUES (?,?,?,?)";
+    const sql = "INSERT INTO usuarios (nombre_usuario, apellido_usuario, correo_electronico, telefono, fecha_nacimiento, fecha_registro,  password, imagen,  id_genero, id_rol, id_localidad) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
 
-    db.query(sql,[nombre_usuario, apellido_usuario, telefono, correo_electronico, fecha_nacimiento, fecha_registro,  password, imagen,  id_genero, id_rol, id_localidad], (error, result) => {
+    db.query(sql,[nombre_usuario, apellido_usuario, correo_electronico, telefono, fecha_nacimiento, fecha_registro,  password, imagen,  id_genero, id_rol, id_localidad], (error, result) => {
         console.log(result);
         if(error){
             return res.status(500).json({error : "ERROR: Intente mas tarde por favor"});

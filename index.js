@@ -37,5 +37,5 @@ app.get("/", (req, res) => {
 // Esta es la ruta principal del proyecto "/"
 
 
-const PORT = process.env.PORT || 3001;
+const PORT = 3000;
 app.listen(PORT, ()=> console.log(`http://localhost:${PORT}`));

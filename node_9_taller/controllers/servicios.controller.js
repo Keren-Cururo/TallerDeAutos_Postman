@@ -47,12 +47,12 @@ const storeServicio = (req, res) => {
         imageName = req.file.filename;
     };
 
-    const {nombre_servicio, descripcion, fecha_alta_servicio} = req.body;
+    const {nombre_servicio, descripcion, fecha_alta_servicio, imagen} = req.body;
 
     const sql = "INSERT INTO servicios (nombre_servicio, descripcion, fecha_alta_servicio, imagen) VALUES (?,?,?,?)";
 
 
-    db.query(sql,[nombre_servicio, descripcion, fecha_alta_servicio], (error, result) => {
+    db.query(sql,[nombre_servicio, descripcion, fecha_alta_servicio, imagen], (error, result) => {
         console.log(result);
         if(error){
             return res.status(500).json({error : "ERROR: Intente mas tarde por favor"});

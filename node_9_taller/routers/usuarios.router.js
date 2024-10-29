@@ -50,6 +50,8 @@ router.get('/', controller.allUsuario);
 // Para un producto
 router.get('/:id_usuario', controller.showUsuario);
 
+//// METODO POST  ////
+router.post('/', upload.single('imagen'), controller.storeUsuario);
 
 //// METODO PUT  ////
 router.put('/:id_usuario', controller.updateUsuario);

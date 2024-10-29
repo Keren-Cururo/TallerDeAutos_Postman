@@ -52,9 +52,6 @@ router.get('/:id_servicio', controller.showServicio);
 //// METODO POST  ////
 router.post('/', upload.single('imagen'), controller.storeServicio);
 
-//// METODO POST  ////
-router.post('/', controller.storeServicio);
-
 //// METODO PUT  ////
 router.put('/:id_servicio', controller.updateServicio);
 
