@@ -47,15 +47,15 @@ const storeServicio = (req, res) => {
         imageName = req.file.filename;
     };
 
-    const {nombre_servicio, descripcion, fecha_alta_servicio, imagen} = req.body;
+    const {nombre_servicio, descripcion, fecha_alta_servicio, } = req.body;
 
     const sql = "INSERT INTO servicios (nombre_servicio, descripcion, fecha_alta_servicio, imagen) VALUES (?,?,?,?)";
 
 
-    db.query(sql,[nombre_servicio, descripcion, fecha_alta_servicio, imagen], (error, result) => {
+    db.query(sql,[nombre_servicio, descripcion, fecha_alta_servicio, imageName], (error, result) => {
         console.log(result);
         if(error){
-            return res.status(500).json({error : "ERROR: Intente mas tarde por favor"});
+            return res.status(500).json({error : "ERROR: Intente mas tarde por favor"}); //error de sintaxis, fijarse mal arriba 
         }
         const servicio = {...req.body, id: result.insertId}; // ... reconstruir el objeto del body
         res.status(201).json(servicio); // muestra creado con exito el elemento
