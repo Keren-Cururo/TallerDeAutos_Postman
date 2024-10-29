@@ -2,12 +2,14 @@
 const express = require("express");
 const router = express.Router();
 
+
 //// MULTER ////
 const multer = require("multer");
 const path = require("path");
 
 
-const controller = require("../controllers/servicios.controller");
+const controller = require("../controllers/usuarios.controller");
+
 
 const storage = multer.diskStorage({
     destination:(req, file, cb) => {
@@ -40,26 +42,20 @@ const upload = multer({
 
 
 
-
 //// METODO GET  /////
 
 // Para todos los productos
-router.get('/', controller.allServicio);
+router.get('/', controller.allUsuario);
 
 // Para un producto
-router.get('/:id_servicio', controller.showServicio);
+router.get('/:id_usuario', controller.showUsuario);
 
-//// METODO POST  ////
-router.post('/', upload.single('imagen'), controller.storeServicio);
-
-//// METODO POST  ////
-router.post('/', controller.storeServicio);
 
 //// METODO PUT  ////
-router.put('/:id_servicio', controller.updateServicio);
+router.put('/:id_usuario', controller.updateUsuario);
 
 //// METODO DELETE ////
-router.delete('/:id_servicio', controller.destroyServicio);
+router.delete('/:id_usuario', controller.destroyUsuario);
 
 // EXPORTAR ROUTERS
 module.exports = router;

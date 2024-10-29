@@ -12,7 +12,7 @@ connection.connect((error) => {
     if(error){
         return console.error(error);
     }
-    console.log("Estamos conectados a la Base de Datos - cinema");
+    console.log("Estamos conectados a la Base de Datos - tallerautosdb");
 });
 
 // EXPORTAR DEL MODULO LA FUNCION CONNECTION

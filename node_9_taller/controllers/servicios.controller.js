@@ -21,7 +21,7 @@ const allServicio = (req, res) => {
     }); 
 };
 
-// // Para una pelicula
+// // Para un servicio
 const showServicio = (req, res) => {
     const {id_servicio} = req.params;
     const sql = "SELECT * FROM servicios WHERE id_servicio = ?";
@@ -38,12 +38,20 @@ const showServicio = (req, res) => {
     }); 
 };
 
-
-
-// //// METODO POST  ////
+//// METODO POST  ////
 const storeServicio = (req, res) => {
+    console.log(req.file);
+    let imageName = "";
+
+    if(req.file){
+        imageName = req.file.filename;
+    };
+
     const {nombre_servicio, descripcion, fecha_alta_servicio} = req.body;
-    const sql = "INSERT INTO servicios (nombre_servicio, descripcion, fecha_alta_servicio) VALUES (?,?,?)";
+
+    const sql = "INSERT INTO servicios (nombre_servicio, descripcion, fecha_alta_servicio, imagen) VALUES (?,?,?,?)";
+
+
     db.query(sql,[nombre_servicio, descripcion, fecha_alta_servicio], (error, result) => {
         console.log(result);
         if(error){
@@ -53,7 +61,9 @@ const storeServicio = (req, res) => {
         res.status(201).json(servicio); // muestra creado con exito el elemento
     });     
 
-};
+}
+
+
 
 //// METODO PUT  ////
 const updateServicio = (req, res) => {
