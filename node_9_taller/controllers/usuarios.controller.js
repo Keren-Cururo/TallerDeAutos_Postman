@@ -67,6 +67,7 @@ const storeUsuario = (req, res) => {
     db.query(sql,[nombre_usuario, apellido_usuario, correo_electronico, telefono, fecha_nacimiento, fecha_registro,  password, imageName,  id_genero, id_rol, id_localidad], (error, result) => {
         console.log(result);
         if(error){
+            console.log(error); // Registro detallado del error
             return res.status(500).json({error : "ERROR: Intente mas tarde por favor"});
         }
         const usuario = {...req.body, id: result.insertId}; // ... reconstruir el objeto del body
