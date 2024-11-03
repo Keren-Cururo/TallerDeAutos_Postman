@@ -1,22 +1,103 @@
 /// CONTROLADORES DEL MODULO ///
-
-// Campos de la tabla usuarios
-// id_usuario
-// nombre_usuario 1
-// apellido_usuario 2
-// correo_electronico 3 
-// telefono 4
-// fecha_nacimiento 5 
-// fecha_registro 6 
-// imagen
-// password 7 
-// id_genero 8 
-// id_rol 9 
-// id_localidad 10
-
-
-
 const db = require("../db/db");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+
+const registerUsuario = (req, res) => {
+    console.log(req.file);
+    let imageName = "";
+    if (req.file) {
+        imageName = req.file.filename;
+    }
+
+    // Extraer los datos del cuerpo de la solicitud
+    const { nombreUsuario, apellidoUsuario, correoElectronico, telefono, fechaNacimiento, password, idGenero, idRol, idLocalidad } = req.body;
+
+    // Encriptar la contraseña
+    const hash = bcrypt.hashSync(password, 8);
+    console.log(hash);
+
+    // Verificar si el usuario ya existe
+    db.query('SELECT * FROM usuarios WHERE correo_electronico = ?', [correoElectronico], (error, result) => {
+        if (error) {
+            console.error("Registration error:", error);
+            return res.status(500).send("Error checking user existence");
+        }
+
+        if (result.length > 0) {
+            return res.status(400).send("User with that email already exists.");
+        }
+
+         /////////////////////////
+        const sql = "INSERT INTO usuarios (nombre_usuario, apellido_usuario, correo_electronico, telefono, fecha_nacimiento, password, imagen, id_genero, id_rol, id_localidad) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        const values = [nombreUsuario, apellidoUsuario, correoElectronico, telefono, fechaNacimiento, hash, imageName, idGenero, idRol, idLocalidad];
+        
+        db.query(sql, values, (error, result) => {
+            if (error) {
+                console.log("Error al intentar realizar el insert", error);
+                return res.status(500).json({ error: "Error en el código, intente más tarde" });
+            }
+
+            // Definir userId
+            const userId = result.insertId;
+
+            // Generar un token JWT con el ID del usuario
+            const token = jwt.sign(
+                { id: userId },
+                process.env.SECRET_KEY,
+                { expiresIn: "1h" }
+            );
+
+            // Enviar la respuesta con el token
+            const userCreado = { ...req.body, id: userId };
+            res.status(201).send({ userCreado, token });
+        });
+    });
+};
+
+
+// login POST
+// Función para hacer login
+const loginUsuario = (req, res) => {
+    const { correoElectronico, password } = req.body;
+
+    // Buscar al usuario por correo electrónico
+    db.query('SELECT * FROM usuarios WHERE correo_electronico = ?', [correoElectronico], (error, result) => {
+        if (error) {
+            console.error("Login error:", error);
+            return res.status(500).send("Error during login");
+        }
+
+        // Verificar si el usuario existe
+        if (result.length === 0) { // Si la longitud del resultado es igual a "0" significa que no encontro nada 
+            return res.status(404).send("User not found.");
+        }
+
+        const user = result[0]; //El resultado de la funcion trae el ID a la constante user 
+
+        // Comparar la contraseña
+        bcrypt.compare(password, user.Password, (error, passwordIsValid) => {
+            if (error) {
+                console.error("Error comparing passwords:", error);
+                return res.status(500).send("Error comparing passwords");
+            }
+
+            if (!passwordIsValid) { // si la contraseña es invalida la utenticacion es falsa y el token nulo
+                return res.status(401).send({ auth: false, token: null });
+            }
+
+            // Generar un token JWT con el ID del usuario
+            const token = jwt.sign({ id: user.idUsuario }, process.env.SECRET_KEY, {
+                expiresIn: "1h",
+            });
+
+            // Enviar la respuesta con el token
+            const userCreado = { ...req.body, id: result.insertId };
+            res.status(201).send({userCreado, token});
+        });
+    });
+};
+
 
 //// METODO GET  /////
 
@@ -36,9 +117,9 @@ const allUsuario = (req, res) => {
 
 // Para un usuario
 const showUsuario = (req, res) => {
-    const {id_usuario} = req.params;
+    const {idUsuario} = req.params;
     const sql = "SELECT * FROM usuarios WHERE id_usuario = ?";
-    db.query(sql,[id_usuario], (error, rows) => {
+    db.query(sql, [idUsuario], (error, rows) => {
         console.log(rows);
         if(error){
             return res.status(500).json({error : "ERROR: Intente mas tarde por favor"});
@@ -50,43 +131,15 @@ const showUsuario = (req, res) => {
         // me muestra el elemento en la posicion cero si existe.
     }); 
 };
-//// METODO POST  ////
-const storeUsuario = (req, res) => {
-    console.log(req.file);
-    let imageName = "";
-
-    if(req.file){
-        imageName = req.file.filename;
-    };
-
-    const {nombre_usuario, apellido_usuario, correo_electronico, telefono, fecha_nacimiento, fecha_registro,  password, id_genero, id_rol, id_localidad} = req.body;
-
-    const sql = "INSERT INTO usuarios (nombre_usuario, apellido_usuario, correo_electronico, telefono, fecha_nacimiento, fecha_registro,  password, imagen,  id_genero, id_rol, id_localidad) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
-
-
-    db.query(sql,[nombre_usuario, apellido_usuario, correo_electronico, telefono, fecha_nacimiento, fecha_registro,  password, imageName,  id_genero, id_rol, id_localidad], (error, result) => {
-        console.log(result);
-        if(error){
-            console.log(error); // Registro detallado del error
-            return res.status(500).json({error : "ERROR: Intente mas tarde por favor"});
-        }
-        const usuario = {...req.body, id: result.insertId}; // ... reconstruir el objeto del body
-        res.status(201).json(usuario); // muestra creado con exito el elemento
-    });     
-
-}
-
-
-
 
 
 
 //// METODO PUT  ////
 const updateUsuario = (req, res) => {
-    const {id_usuario} = req.params;
-    const {nombre_usuario, apellido_usuario, telefono, correo_electronico, fecha_nacimiento, fecha_registro,  password, imagen,  id_genero, id_rol, id_localidad} = req.body;
-    const sql ="UPDATE usuarios SET nombre_usuario = ?, apellido_usuario = ?, telefono =?, correo_electronico =?, fecha_nacimiento =?, fecha_registro =?, password = ?, id_genero =?, id_rol= ?, id_localidad =? WHERE id_usuario = ?";
-    db.query(sql,[nombre_usuario, apellido_usuario, telefono, correo_electronico, fecha_nacimiento, fecha_registro,  password, imagen, id_genero, id_rol, id_localidad, id_usuario], (error, result) => {
+    const {idUsuario} = req.params;
+    const {nombreUsuario, apellidoUsuario, correoElectronico, telefono,  fechaNacimiento,  hash, imageName,  idGenero, idRol, idLocalidad} = req.body;
+    const sql ="UPDATE usuarios SET nombre_usuario = ?, apellido_usuario = ?, correo_electronico =?, telefono =?, fecha_nacimiento =?, password = ?, id_genero =?, id_rol= ?, id_localidad =? WHERE id_usuario = ?";
+    db.query(sql,[nombreUsuario, apellidoUsuario, correoElectronico, telefono,  fechaNacimiento,  hash, imageName, idGenero, idRol, idLocalidad, idUsuario], (error, result) => {
         console.log(result);
         if(error){
             return res.status(500).json({error : "ERROR: Intente mas tarde por favor"});
@@ -104,9 +157,9 @@ const updateUsuario = (req, res) => {
 
 //// METODO DELETE ////
 const destroyUsuario = (req, res) => {
-    const {id_usuario} = req.params;
+    const {idUsuario} = req.params;
     const sql = "DELETE FROM usuarios WHERE id_usuario = ?";
-    db.query(sql,[id_usuario], (error, result) => {
+    db.query(sql,[idUsuario], (error, result) => {
         console.log(result);
         if(error){
             return res.status(500).json({error : "ERROR: Intente mas tarde por favor"});
@@ -119,13 +172,12 @@ const destroyUsuario = (req, res) => {
 };
 
 
-
-
 // EXPORTAR DEL MODULO TODAS LAS FUNCIONES
 module.exports = {
+    registerUsuario,
+    loginUsuario,
     allUsuario,
     showUsuario,
-    storeUsuario,
     updateUsuario,
     destroyUsuario
 };

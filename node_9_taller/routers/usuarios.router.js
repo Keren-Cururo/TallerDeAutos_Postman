@@ -1,27 +1,24 @@
 /// RUTAS DEL MODULO ///
 const express = require("express");
 const router = express.Router();
-
-
-//// MULTER ////
-const multer = require("multer");
-const path = require("path");
-
+const multer = require("multer"); // multer
+const path = require("path"); // es la ruta interna de los archivos en la pc 
 
 const controller = require("../controllers/usuarios.controller");
 
-
+// esto es para guardar el archivo 
 const storage = multer.diskStorage({
     destination:(req, file, cb) => {
         cb(null, 'uploads'); // esta carpeta debe existir en el proyecto (raiz)
     },
+     //es para nombrar el archivo con la fecha con la cual se subio al sistema 
     filename: (req, file, cb) => {
         console.log(file);
         cb(null, Date.now() + path.extname(file.originalname)); // segundos desde 1970
     },
 });
 
-
+// es la validacion de las imagenes subidas
 const upload = multer({
     storage,
     fileFilter: (req, file, cb) => {
@@ -41,17 +38,17 @@ const upload = multer({
 
 
 
-
 //// METODO GET  /////
-
 // Para todos los productos
 router.get('/', controller.allUsuario);
 
 // Para un producto
 router.get('/:id_usuario', controller.showUsuario);
 
-//// METODO POST  ////
-router.post('/', upload.single('imagen'), controller.storeUsuario);
+//// METODO POST  ////  No se le colocan los dos puntos a id usuario porque al registrarse se crear el id usuario 
+router.post('/register', upload.single('imageName'), controller.registerUsuario); // imagn en bbdd
+
+router.post('/login', controller.loginUsuario);
 
 //// METODO PUT  ////
 router.put('/:id_usuario', controller.updateUsuario);
