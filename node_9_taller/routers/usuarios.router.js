@@ -43,7 +43,7 @@ const upload = multer({
 router.get('/', controller.allUsuario);
 
 // Para un producto
-router.get('/:id_usuario', controller.showUsuario);
+router.get('/:idUsuario', controller.showUsuario);
 
 //// METODO POST  ////  No se le colocan los dos puntos a id usuario porque al registrarse se crear el id usuario 
 router.post('/register', upload.single('imageName'), controller.registerUsuario); // imagn en bbdd
@@ -51,10 +51,12 @@ router.post('/register', upload.single('imageName'), controller.registerUsuario)
 router.post('/login', controller.loginUsuario);
 
 //// METODO PUT  ////
-router.put('/:id_usuario', controller.updateUsuario);
+// router.put('/:idUsuario', upload.single('imageName'), controller.updateUsuario);
+
+router.put('/:idUsuario', upload.single('imageName'), controller.updateUsuario);
 
 //// METODO DELETE ////
-router.delete('/:id_usuario', controller.destroyUsuario);
+router.delete('/:idUsuario', controller.destroyUsuario);
 
 // EXPORTAR ROUTERS
 module.exports = router;

@@ -9,8 +9,6 @@ app.use(express.json());
 // lo voy a poder utilizar
 
 
-
-
 const serviciosRouter = require('./node_9_taller/routers/servicios.router');
 app.use('/servicios', serviciosRouter);
 // Siempre que me refiera a peliculas le coloco el prefijo

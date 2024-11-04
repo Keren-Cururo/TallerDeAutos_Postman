@@ -14,7 +14,7 @@ const registerUsuario = (req, res) => {
     const { nombreUsuario, apellidoUsuario, correoElectronico, telefono, fechaNacimiento, password, idGenero, idRol, idLocalidad } = req.body;
 
     // Encriptar la contraseña
-    const hash = bcrypt.hashSync(password, 8);
+    let hash = bcrypt.hashSync(password, 8);
     console.log(hash);
 
     // Verificar si el usuario ya existe
@@ -136,10 +136,45 @@ const showUsuario = (req, res) => {
 
 //// METODO PUT  ////
 const updateUsuario = (req, res) => {
+    console.log(req.file); // imprime en consola la info del archvo subido
+    let imageName = req.body.imageName || ""; // usar la imagen que ya esta en la bbdd o que marque null en caso de no tener
+    if (req.file) {
+        imageName = req.file.filename;
+    }
+
     const {idUsuario} = req.params;
-    const {nombreUsuario, apellidoUsuario, correoElectronico, telefono,  fechaNacimiento,  hash, imageName,  idGenero, idRol, idLocalidad} = req.body;
-    const sql ="UPDATE usuarios SET nombre_usuario = ?, apellido_usuario = ?, correo_electronico =?, telefono =?, fecha_nacimiento =?, password = ?, id_genero =?, id_rol= ?, id_localidad =? WHERE id_usuario = ?";
-    db.query(sql,[nombreUsuario, apellidoUsuario, correoElectronico, telefono,  fechaNacimiento,  hash, imageName, idGenero, idRol, idLocalidad, idUsuario], (error, result) => {
+    const {nombreUsuario, apellidoUsuario, correoElectronico, telefono,  fechaNacimiento,  password,  idGenero, idRol, idLocalidad} = req.body;
+
+    let hash;
+    if(password){// verificamos si el usuario ha proporcionado una nueva contraseña
+        hash = bcrypt.hashSync(password,8);// se encripta la nueva contraseña
+    }
+
+    console.log(`id de usuario a actualizar: ${idUsuario}`);
+
+    //verificamos si el usuario existe
+    const sqlVerificar = "SELECT * FROM usuarios WHERE id_usuario = ?";
+    db.query(sqlVerificar, [idUsuario], (error, result) => {
+        if(error){
+            console.log(error);
+            return res.status(500).json({error: "Error"});
+        }
+        if (result.affectedRows === 0) { 
+            return res.status(404).send({ error: "ERROR: El usuario a modificar no existe" }); 
+        }
+        
+        if(result.length===0){ // si la longitud de lo buscado es de 0 significa que no encontro al usuario buscado en la bbdd
+            return res.status(404).json({error: "El usuario a modificar no existe"});
+        }
+
+        const usuarioExistente = result[0];
+        // usar la nueva contraseña con el hash nuevo o usar la antigua
+        // puede o ser la antigua o puede ser dependiendo de la condicion la nueva
+        const nuevaPassword = hash || usuarioExistente.password;
+
+        const sql ="UPDATE usuarios SET nombre_usuario=?, apellido_usuario=?, correo_electronico=?, telefono=?, fecha_nacimiento=?, password=?, id_genero=?, id_rol=?, id_localidad=? WHERE id_usuario=?";
+        // le pasamos la nueva password a la bbdd
+        db.query(sql,[nombreUsuario, apellidoUsuario, correoElectronico, telefono,  fechaNacimiento,  nuevaPassword, imageName, idGenero, idRol, idLocalidad, idUsuario], (error, result) => {
         console.log(result);
         if(error){
             return res.status(500).json({error : "ERROR: Intente mas tarde por favor"});
@@ -148,9 +183,9 @@ const updateUsuario = (req, res) => {
             return res.status(404).send({error : "ERROR: El usuario a modificar no existe"});
         };
         
-        const usuario = {...req.body, ...req.params}; // ... reconstruir el objeto del body
-
+        const usuario = {...req.body, idUsuario}; // ... reconstruir el objeto del body
         res.json(usuario); // mostrar el elemento que existe
+        });
     });     
 };
 
