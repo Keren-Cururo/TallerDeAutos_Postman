@@ -23,6 +23,7 @@ app.use('/usuarios', usuariosRouter);
 const generosRouter = require('./node_9_taller/routers/generos.router');
 app.use('/generos', generosRouter);
 
+
 const localidadesRouter = require('./node_9_taller/routers/localidades.router');
 app.use('/localidades', localidadesRouter);
 

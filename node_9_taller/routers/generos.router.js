@@ -12,6 +12,8 @@ router.get('/', controller.allGeneros);
 // Para un producto
 router.get('/:id_genero', controller.showGenero);
 
+//POST//
+router.post('/', controller.storeGenero);
 
 //// METODO PUT  ////
 router.put('/:id_genero', controller.updateGenero);

@@ -55,14 +55,14 @@ const storeEmpleado = (req, res) => {
 const updateEmpleado = (req, res) => {
     const {id_empleado} = req.params;
     const {cargo} = req.body;
-    const sql ="UPDATE empleados SET cargo = ?  WHERE id_empleado ?";
+    const sql ="UPDATE empleados SET cargo = ?  WHERE id_empleado = ?";
     db.query(sql,[cargo, id_empleado], (error, result) => {
         console.log(result);
         if(error){
             return res.status(500).json({error : "ERROR: Intente mas tarde por favor"});
         }
         if(result.affectedRows == 0){
-            return res.status(404).send({error : "ERROR: El servicio a modificar no existe"});
+            return res.status(404).send({error : "ERROR: el empleado a modificar no existe"});
         };
         
         const empleado = {...req.body, ...req.params}; // ... reconstruir el objeto del body

@@ -147,63 +147,89 @@ const showUsuario = (req, res) => {
     }); 
 };
 
+
+
 const updateUsuario = (req, res) => {
-    console.log(req.file);
-    let imageName = "";
-
-    if (req.file) {
-        imageName = req.file.filename;
-    }
-
-    const { idUsuario } = req.params; 
-    const { nombreUsuario, apellidoUsuario, correoElectronico, telefono, fechaNacimiento, password, idGenero, idRol, idLocalidad, nuevoRol } = req.body; // Asegúrate de tener 'nuevoRol' en el cuerpo de la solicitud
-
-    const hash = bcrypt.hashSync(password, 8); 
-    console.log(hash);
-
-    const sqlBuscarUsuario = "SELECT id_rol FROM usuarios WHERE id_usuario = ?";
-    db.query(sqlBuscarUsuario, [idUsuario], (error, result) => {
+    const { id_usuario } = req.params;
+    const { nombre_usuario, apellido_usuario, correo_electronico, telefono, fecha_nacimiento, password, id_genero, id_rol, id_localidad } = req.body;
+    const sql = "UPDATE usuarios SET nombre_usuario = ?, apellido_usuario = ?, correo_electronico = ?, telefono = ?, fecha_nacimiento = ?, password = ?, id_genero = ?, id_rol = ?, id_localidad = ? WHERE id_usuario = ?";
+    
+    db.query(sql, [nombre_usuario, apellido_usuario, correo_electronico, telefono, fecha_nacimiento, password, id_genero, id_rol, id_localidad, id_usuario], (error, result) => {
         if (error) {
-            console.log("Error al buscar el usuario:", error);
-            return res.status(500).json({ error: "Error de sintaxis, intente más tarde" });
+            console.error("Error updating usuario:", error);
+            return res.status(500).json({ error: "ERROR: Intente más tarde por favor" });
         }
-        if (result.length === 0) {
-            return res.status(404).json({ error: "Usuario no encontrado" });
+        if (result.affectedRows === 0) {
+            return res.status(404).send({ error: "ERROR: El usuario a modificar no existe" });
         }
+        
+        const usuario = { ...req.body, ...req.params }; // reconstruir el objeto del body
 
-        const idRolActual = result[0].id_rol;
-        console.log(idRolActual);
-
-        const sqlActualizarUsuario = `
-            UPDATE usuarios 
-            SET nombre_usuario = ?, apellido_usuario = ?, correo_electronico = ?, telefono = ?, fecha_nacimiento = ?, imagen = ?, password = ?, id_genero = ?, id_rol = ?, id_localidad = ?
-            WHERE id_usuario = ?
-        `;
-
-        db.query(sqlActualizarUsuario, [
-            nombreUsuario, apellidoUsuario, correoElectronico, telefono, fechaNacimiento, imageName, hash, idGenero, nuevoRol, idLocalidad, idUsuario
-        ], (error, result) => {
-            if (error) {
-                console.log("Error al actualizar el usuario:", error);
-                return res.status(500).json({ error: "Error: intente más tarde" });
-            }
-            if (result.affectedRows === 0) {
-                return res.status(404).send({ error: "Error: el usuario a modificar no existe" });
-            }
-            res.status(200).json({ message: "Usuario actualizado correctamente" });
-
-            const sqlSelect = "SELECT * FROM usuarios WHERE id_usuario = ?";
-            db.query(sqlSelect, [idUsuario], (error, result) => {
-                if (error) {
-                    return res.status(500).json({ error: "Error: intente más tarde" });
-                }
-                const userActualizado = result[0];
-                res.json(userActualizado);
-            });
-        });
+        res.json(usuario); // mostrar el elemento que existe
     });
 };
 
+
+
+
+
+
+// const updateUsuario = (req, res) => {
+//     console.log(req.file);
+//     let imageName = "";
+
+//     if (req.file) {
+//         imageName = req.file.filename;
+//     }
+
+//     const { idUsuario } = req.params; 
+//     const { nombreUsuario, apellidoUsuario, correoElectronico, telefono, fechaNacimiento, password, idGenero, idRol, idLocalidad } = req.body; // Asegúrate de tener 'nuevoRol' en el cuerpo de la solicitud
+
+//     const hash = bcrypt.hashSync(password, 8); 
+//     console.log(hash);
+
+//     const sqlBuscarUsuario = "SELECT id_rol FROM usuarios WHERE id_usuario = ?";
+//     db.query(sqlBuscarUsuario, [idUsuario], (error, result) => {
+//         if (error) {
+//             console.log("Error al buscar el usuario:", error);
+//             return res.status(500).json({ error: "Error de sintaxis, intente más tarde" });
+//         }
+//         if (result.length === 0) {
+//             return res.status(404).json({ error: "Usuario no encontrado" });
+//         }
+
+//         const idRolActual = result[0].id_rol;
+//         console.log(idRolActual);
+
+//         const sqlActualizarUsuario = `
+//             UPDATE usuarios 
+//             SET nombre_usuario = ?, apellido_usuario = ?, correo_electronico = ?, telefono = ?, fecha_nacimiento = ?, imagen = ?, password = ?, id_genero = ?, id_rol = ?, id_localidad = ?
+//             WHERE id_usuario = ?
+//         `;
+
+//         db.query(sqlActualizarUsuario, [
+//             nombreUsuario, apellidoUsuario, correoElectronico, telefono, fechaNacimiento, imageName, hash, idGenero, idRol, idLocalidad, idUsuario
+//         ], (error, result) => {
+//             if (error) {
+//                 console.log("Error al actualizar el usuario:", error);
+//                 return res.status(500).json({ error: "Error: intente más tarde" });
+//             }
+//             if (result.affectedRows === 0) {
+//                 return res.status(404).send({ error: "Error: el usuario a modificar no existe" });
+//             }
+//             res.status(200).json({ message: "Usuario actualizado correctamente" });
+
+//             const sqlSelect = "SELECT * FROM usuarios WHERE id_usuario = ?";
+//             db.query(sqlSelect, [idUsuario], (error, result) => {
+//                 if (error) {
+//                     return res.status(500).json({ error: "Error: intente más tarde" });
+//                 }
+//                 const userActualizado = result[0];
+//                 res.json(userActualizado);
+//             });
+//         });
+//     });
+// };
 
 
 

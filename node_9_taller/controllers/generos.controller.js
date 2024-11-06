@@ -55,21 +55,26 @@ const storeGenero = (req, res) => {
 const updateGenero = (req, res) => {
     const {id_genero} = req.params;
     const {nombre_genero} = req.body;
-    const sql ="UPDATE servicios SET nombre_genero = ?  WHERE id_genero= ?";
-    db.query(sql,[nombre_genero], (error, result) => {
+    const sql = "UPDATE generos SET nombre_genero = ? WHERE id_genero = ?";
+    
+    db.query(sql, [nombre_genero, id_genero], (error, result) => {
         console.log(result);
-        if(error){
-            return res.status(500).json({error : "ERROR: Intente mas tarde por favor"});
+        if (error) {
+            console.error("Error updating genero:", error);
+            return res.status(500).json({ error: "ERROR: Intente más tarde por favor" });
         }
-        if(result.affectedRows == 0){
-            return res.status(404).send({error : "ERROR: El servicio a modificar no existe"});
-        };
+        if (result.affectedRows === 0) {
+            return res.status(404).send({ error: "ERROR: El servicio a modificar no existe" });
+        }
         
-        const genero = {...req.body, ...req.params}; // ... reconstruir el objeto del body
+        const genero = { ...req.body, ...req.params }; // reconstruir el objeto del body
 
         res.json(genero); // mostrar el elemento que existe
     });     
 };
+
+
+
 
 //// METODO DELETE ////
 const destroyGenero= (req, res) => {
