@@ -49,7 +49,7 @@ const storeServicio = (req, res) => {
 
     const {nombre_servicio, descripcion, fecha_alta_servicio } = req.body;
 
-    const sql = "INSERT INTO servicios (nombre_servicio, descripcion, fecha_alta_servicio, imagen) VALUES (?,?,?,?)";
+    const sql = "INSERT INTO servicios (nombre_servicio , descripcion, fecha_alta_servicio, imagen) VALUES (?,?,?,?)";
     db.query(sql,[nombre_servicio, descripcion, fecha_alta_servicio, imageName], (error, result) => {
         console.log(result);
         if(error){

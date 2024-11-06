@@ -5,6 +5,7 @@ const express = require("express");
 require("dotenv").config();
 const app = express();
 app.use(express.json());
+
 // en el cuerpo de la peticion viene un json, lo voy a transformar en un objeto JS y de esta manera
 // lo voy a poder utilizar
 

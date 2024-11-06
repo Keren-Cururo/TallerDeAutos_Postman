@@ -56,7 +56,8 @@ const registerUsuario = (req, res) => {
 };
 
 
-// login POST
+
+
 // Función para hacer login
 const loginUsuario = (req, res) => {
     const { correoElectronico, password } = req.body;
@@ -69,20 +70,31 @@ const loginUsuario = (req, res) => {
         }
 
         // Verificar si el usuario existe
-        if (result.length === 0) { // Si la longitud del resultado es igual a "0" significa que no encontro nada 
+        if (result.length === 0) { 
             return res.status(404).send("User not found.");
         }
 
-        const user = result[0]; //El resultado de la funcion trae el ID a la constante user 
+        const user = result[0]; // Obtener el usuario de la consulta
+
+        // Agregar logs para verificar los valores
+        console.log("Resultados de la consulta:", result);
+        console.log("Contraseña ingresada:", password);
+        console.log("Contraseña almacenada:", user.password);
+
+        // Verificar que la contraseña almacenada no sea undefined
+        if (!user.password) {
+            console.error("Contraseña almacenada no encontrada o es undefined");
+            return res.status(500).send("Contraseña almacenada no encontrada");
+        }
 
         // Comparar la contraseña
-        bcrypt.compare(password, user.Password, (error, passwordIsValid) => {
+        bcrypt.compare(password, user.password, (error, passwordIsValid) => {
             if (error) {
                 console.error("Error comparing passwords:", error);
                 return res.status(500).send("Error comparing passwords");
             }
 
-            if (!passwordIsValid) { // si la contraseña es invalida la utenticacion es falsa y el token nulo
+            if (!passwordIsValid) { 
                 return res.status(401).send({ auth: false, token: null });
             }
 
@@ -92,11 +104,14 @@ const loginUsuario = (req, res) => {
             });
 
             // Enviar la respuesta con el token
-            const userCreado = { ...req.body, id: result.insertId };
-            res.status(201).send({userCreado, token});
+            res.status(201).send({ user, token });
         });
     });
 };
+
+
+
+
 
 
 //// METODO GET  /////
@@ -132,48 +147,67 @@ const showUsuario = (req, res) => {
     }); 
 };
 
-
-
-//// METODO PUT  ////
 const updateUsuario = (req, res) => {
-    console.log(req.file); // imprime en consola la info del archvo subido al put
-    let imageName = req.body.imageName || ""; // usar la imagen que ya esta en la bbdd o que marque null en caso de no tener
+    console.log(req.file);
+    let imageName = "";
+
     if (req.file) {
         imageName = req.file.filename;
     }
 
-   const { nombreUsuario, apellidoUsuario, correoElectronico, telefono,  fechaNacimiento, fechaRegistro, password, idGenero, idRol, idLocalidad} = req.body;
-    //if(!nombreUsuario || !apellidoUsuario || !correoElectronico || !telefono || !fechaNacimiento || !fechaRegistro ||  !password || !idGenero || !idRol || !idLocalidad){
-      //  return res.status(400).send("todos los campos son obligatorios");
-   // }
+    const { idUsuario } = req.params; 
+    const { nombreUsuario, apellidoUsuario, correoElectronico, telefono, fechaNacimiento, password, idGenero, idRol, idLocalidad, nuevoRol } = req.body; // Asegúrate de tener 'nuevoRol' en el cuerpo de la solicitud
 
-   ; // Verifica si la contraseña está definida antes de intentar encriptarla 
-   if (!password) { 
-    return res.status(400).json({ error: "La contraseña es obligatoria" });
-   }
-    bcrypt.hash(password, 8, (error, hash) =>{
-        if(error){
-            console.log("error en la encrptacion", error);
-            return res.status(500).send("error de encriptacion");
+    const hash = bcrypt.hashSync(password, 8); 
+    console.log(hash);
+
+    const sqlBuscarUsuario = "SELECT id_rol FROM usuarios WHERE id_usuario = ?";
+    db.query(sqlBuscarUsuario, [idUsuario], (error, result) => {
+        if (error) {
+            console.log("Error al buscar el usuario:", error);
+            return res.status(500).json({ error: "Error de sintaxis, intente más tarde" });
         }
-        const{idUsuario} = req.params;
+        if (result.length === 0) {
+            return res.status(404).json({ error: "Usuario no encontrado" });
+        }
 
-        //const {nombreUsuario, apellidoUsuario, correoElectronico, telefono,  fechaNacimiento, password,  idGenero, idRol, idLocalidad} = req.body;
-        const sql= "UPDATE usuarios SET nombre_usuario=?, apellido_usuario=?, correo_electronico=?, telefono=?, fecha_nacimiento=?, fecha_registro, password=?, id_genero=?, id_rol=?, id_localidad=? WHERE id_usuario=?";
-        db.query(sql,[nombreUsuario, apellidoUsuario, correoElectronico, telefono,  fechaNacimiento, fechaRegistro,  hash, imageName, idGenero, idRol, idLocalidad, idUsuario],(error,result) =>{
-                console.log(result);
-                if(error){
-                    return res.status(500).json({error: "error intente luego"});
-        
+        const idRolActual = result[0].id_rol;
+        console.log(idRolActual);
+
+        const sqlActualizarUsuario = `
+            UPDATE usuarios 
+            SET nombre_usuario = ?, apellido_usuario = ?, correo_electronico = ?, telefono = ?, fecha_nacimiento = ?, imagen = ?, password = ?, id_genero = ?, id_rol = ?, id_localidad = ?
+            WHERE id_usuario = ?
+        `;
+
+        db.query(sqlActualizarUsuario, [
+            nombreUsuario, apellidoUsuario, correoElectronico, telefono, fechaNacimiento, imageName, hash, idGenero, nuevoRol, idLocalidad, idUsuario
+        ], (error, result) => {
+            if (error) {
+                console.log("Error al actualizar el usuario:", error);
+                return res.status(500).json({ error: "Error: intente más tarde" });
+            }
+            if (result.affectedRows === 0) {
+                return res.status(404).send({ error: "Error: el usuario a modificar no existe" });
+            }
+            res.status(200).json({ message: "Usuario actualizado correctamente" });
+
+            const sqlSelect = "SELECT * FROM usuarios WHERE id_usuario = ?";
+            db.query(sqlSelect, [idUsuario], (error, result) => {
+                if (error) {
+                    return res.status(500).json({ error: "Error: intente más tarde" });
                 }
-                if(result.affectedRows == 0){
-                    return res.status(404).json({error: "error el usuario a modificar no existe"});
-                }
-                const usuario = {idUsuario, nombreUsuario, apellidoUsuario, correoElectronico, telefono,  fechaNacimiento, fechaRegistro, imageName, idGenero, idRol, idLocalidad};
-                res.json(usuario);
+                const userActualizado = result[0];
+                res.json(userActualizado);
+            });
         });
-    });   
+    });
 };
+
+
+
+
+
 
 
 //// METODO DELETE ////
