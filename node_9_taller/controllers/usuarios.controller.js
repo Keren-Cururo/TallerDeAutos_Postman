@@ -178,7 +178,7 @@ const updateUsuario = (req, res) => {
 
 
     const sql = "UPDATE usuarios SET nombre_usuario = ?, apellido_usuario =?, correo_electronico = ?, telefono = ?, fecha_nacimiento =?, password = ?, imagen = ?, id_genero = ?, id_rol = ?, id_localidad =? WHERE id_usuario = ?";
-    db.query(sql, [nombreUsuario,apellidoUsuario,correoElectronico, telefono,  hash, fechaNacimiento,password, imageName,  idGenero, idRol, idLocalidad,  idUsuario], (error, result) => {
+    db.query(sql, [nombreUsuario,apellidoUsuario,correoElectronico, telefono,  hash, fechaNacimiento, imageName,  idGenero, idRol, idLocalidad,  idUsuario], (error, result) => {
         if (error) {
             console.log("Error al intentar actualizar el usuario en la tabla Usuarios:", error);
             return res.status(500).json({ error: `Error al actualizar el usuario ${idUsuario}` });
