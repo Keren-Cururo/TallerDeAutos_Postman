@@ -159,34 +159,36 @@ const showUsuario = (req, res) => {
 
 
 
-//metodo o controlador PUT, actualiza con put un usuario por medio del id
 const updateUsuario = (req, res) => {
-    console.log(req.file); // Mostrar los datos en la consola o terminal
+    console.log(req.file); // Mostrar los datos de la imagen en la consola
+
     if (!req.file) {
         return res.status(400).send('No se subió ningún archivo');
     }
 
-    const imageName = saveImage(req.file); // Guardar la imagen subida y almacenar la URL en imagenUrl
-    const { idUsuario } = req.params; // Obtener el id del usuario como parámetro para buscar el registro a actualizar
-    const { nombreUsuario, apellidoUsuario, correoElectronico, telefono, fechaNacimiento, password, idGenero, idRol, idLocalidad} = req.body; // Obtener los datos del cuerpo de la solicitud
-    
-    
-    //antes nuevoRol
+    const imageName = saveImage(req.file); // Guardar la imagen subida
+    const { idUsuario } = req.params; // Obtener el ID del usuario como parámetro
+    const { nombreUsuario, apellidoUsuario, correoElectronico, telefono, fechaNacimiento, password, idGenero, idRol, idLocalidad } = req.body; // Obtener los datos del cuerpo de la solicitud
+
+    // Verificar que todos los datos estén presentes
+    console.log(req.body);
+
     // Hashear la contraseña antes de guardarla
-    const hash = bcrypt.hashSync(password, 8); // hash sincronico, que hace calculos mat del password
-    console.log(hash); //ver el hash por la console
+    if (!password) {
+        return res.status(400).json({ error: "La contraseña es requerida" });
+    }
+    const hash = bcrypt.hashSync(password, 8); // Generar el hash de la contraseña
+    console.log(hash); // Ver el hash en la consola
 
-
+    // Consulta SQL para actualizar el usuario
     const sql = "UPDATE usuarios SET nombre_usuario = ?, apellido_usuario =?, correo_electronico = ?, telefono = ?, fecha_nacimiento =?, password = ?, imagen = ?, id_genero = ?, id_rol = ?, id_localidad =? WHERE id_usuario = ?";
-    db.query(sql, [nombreUsuario,apellidoUsuario,correoElectronico, telefono,  hash, fechaNacimiento, imageName,  idGenero, idRol, idLocalidad,  idUsuario], (error, result) => {
+    db.query(sql, [nombreUsuario, apellidoUsuario, correoElectronico, telefono, fechaNacimiento, hash, imageName, idGenero, idRol, idLocalidad, idUsuario], (error, result) => {
         if (error) {
             console.log("Error al intentar actualizar el usuario en la tabla Usuarios:", error);
             return res.status(500).json({ error: `Error al actualizar el usuario ${idUsuario}` });
         }
-        // como estaba dando dos respuestas al metodo me crasheaba el server, tenia dos res.status para la misma funcion
-        //res.status(200).json({ message: "El usuario se ha actualizado correctamente" });
 
-        // Obtener el usuario actualizado, pero mostrando el rol
+        // Obtener el usuario actualizado
         const sqlSelect = "SELECT * FROM usuarios WHERE id_usuario = ?";
         db.query(sqlSelect, [idUsuario], (error, result) => {
             if (error) {
