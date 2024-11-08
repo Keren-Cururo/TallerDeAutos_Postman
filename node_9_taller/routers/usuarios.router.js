@@ -51,9 +51,10 @@ router.post('/register', upload.single('imageName'), controller.registerUsuario)
 router.post('/login', controller.loginUsuario);
 
 // //// METODO PUT  ////
-router.put('/:id_usuario', controller.updateUsuario);
+// router.put('/:id_usuario', controller.updateUsuario);
+
 // //// METODO PUT  ////
-// router.put('/:idUsuario', upload.single('imageName'), controller.updateUsuario);
+router.put('/:idUsuario', upload.single('imageName'), controller.updateUsuario);
 
 //// METODO DELETE ////
 router.delete('/:idUsuario', controller.destroyUsuario);

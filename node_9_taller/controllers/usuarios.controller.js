@@ -1,7 +1,17 @@
 /// CONTROLADORES DEL MODULO ///
 const db = require("../db/db");
 const jwt = require("jsonwebtoken");
+const fs = require('fs'); // proporciona una API que interactua con archivos, puede renombrar archivos, leerlos, darles nombre, eliminarlos, etc.
 const bcrypt = require("bcryptjs");
+
+//guardar la img en ruta
+function saveImage(file) {
+    const newPath = `./uploads/${file.originalname}`;
+    fs.renameSync(file.path, newPath);// con fs lo renombro
+    return newPath; // retorna la nueva ruta
+}
+
+
 
 const registerUsuario = (req, res) => {
     console.log(req.file);
@@ -149,87 +159,44 @@ const showUsuario = (req, res) => {
 
 
 
+//metodo o controlador PUT, actualiza con put un usuario por medio del id
 const updateUsuario = (req, res) => {
-    const { id_usuario } = req.params;
-    const { nombre_usuario, apellido_usuario, correo_electronico, telefono, fecha_nacimiento, password, id_genero, id_rol, id_localidad } = req.body;
-    const sql = "UPDATE usuarios SET nombre_usuario = ?, apellido_usuario = ?, correo_electronico = ?, telefono = ?, fecha_nacimiento = ?, password = ?, id_genero = ?, id_rol = ?, id_localidad = ? WHERE id_usuario = ?";
-    
-    db.query(sql, [nombre_usuario, apellido_usuario, correo_electronico, telefono, fecha_nacimiento, password, id_genero, id_rol, id_localidad, id_usuario], (error, result) => {
-        if (error) {
-            console.error("Error updating usuario:", error);
-            return res.status(500).json({ error: "ERROR: Intente más tarde por favor" });
-        }
-        if (result.affectedRows === 0) {
-            return res.status(404).send({ error: "ERROR: El usuario a modificar no existe" });
-        }
-        
-        const usuario = { ...req.body, ...req.params }; // reconstruir el objeto del body
+    console.log(req.file); // Mostrar los datos en la consola o terminal
+    if (!req.file) {
+        return res.status(400).send('No se subió ningún archivo');
+    }
 
-        res.json(usuario); // mostrar el elemento que existe
+    const imageName = saveImage(req.file); // Guardar la imagen subida y almacenar la URL en imagenUrl
+    const { idUsuario } = req.params; // Obtener el id del usuario como parámetro para buscar el registro a actualizar
+    const { nombreUsuario, apellidoUsuario, correoElectronico, telefono, fechaNacimiento, password, idGenero, idRol, idLocalidad} = req.body; // Obtener los datos del cuerpo de la solicitud
+    
+    
+    //antes nuevoRol
+    // Hashear la contraseña antes de guardarla
+    const hash = bcrypt.hashSync(password, 8); // hash sincronico, que hace calculos mat del password
+    console.log(hash); //ver el hash por la console
+
+
+    const sql = "UPDATE usuarios SET nombre_usuario = ?, apellido_usuario =?, correo_electronico = ?, telefono = ?, fecha_nacimiento =?, password = ?, imagen = ?, id_genero = ?, id_rol = ?, id_localidad =? WHERE id_usuario = ?";
+    db.query(sql, [nombreUsuario,apellidoUsuario,correoElectronico, telefono,  hash, fechaNacimiento,password, imageName,  idGenero, idRol, idLocalidad,  idUsuario], (error, result) => {
+        if (error) {
+            console.log("Error al intentar actualizar el usuario en la tabla Usuarios:", error);
+            return res.status(500).json({ error: `Error al actualizar el usuario ${idUsuario}` });
+        }
+        // como estaba dando dos respuestas al metodo me crasheaba el server, tenia dos res.status para la misma funcion
+        //res.status(200).json({ message: "El usuario se ha actualizado correctamente" });
+
+        // Obtener el usuario actualizado, pero mostrando el rol
+        const sqlSelect = "SELECT * FROM usuarios WHERE id_usuario = ?";
+        db.query(sqlSelect, [idUsuario], (error, result) => {
+            if (error) {
+                return res.status(500).json({ error: "Error: intente más tarde" });
+            }
+            const userActualizado = result[0]; // Mostrar el id_rol en la respuesta
+            res.status(200).json({ message: "El usuario se ha actualizado correctamente", user: userActualizado });
+        });
     });
 };
-
-
-
-
-
-
-// const updateUsuario = (req, res) => {
-//     console.log(req.file);
-//     let imageName = "";
-
-//     if (req.file) {
-//         imageName = req.file.filename;
-//     }
-
-//     const { idUsuario } = req.params; 
-//     const { nombreUsuario, apellidoUsuario, correoElectronico, telefono, fechaNacimiento, password, idGenero, idRol, idLocalidad } = req.body; // Asegúrate de tener 'nuevoRol' en el cuerpo de la solicitud
-
-//     const hash = bcrypt.hashSync(password, 8); 
-//     console.log(hash);
-
-//     const sqlBuscarUsuario = "SELECT id_rol FROM usuarios WHERE id_usuario = ?";
-//     db.query(sqlBuscarUsuario, [idUsuario], (error, result) => {
-//         if (error) {
-//             console.log("Error al buscar el usuario:", error);
-//             return res.status(500).json({ error: "Error de sintaxis, intente más tarde" });
-//         }
-//         if (result.length === 0) {
-//             return res.status(404).json({ error: "Usuario no encontrado" });
-//         }
-
-//         const idRolActual = result[0].id_rol;
-//         console.log(idRolActual);
-
-//         const sqlActualizarUsuario = `
-//             UPDATE usuarios 
-//             SET nombre_usuario = ?, apellido_usuario = ?, correo_electronico = ?, telefono = ?, fecha_nacimiento = ?, imagen = ?, password = ?, id_genero = ?, id_rol = ?, id_localidad = ?
-//             WHERE id_usuario = ?
-//         `;
-
-//         db.query(sqlActualizarUsuario, [
-//             nombreUsuario, apellidoUsuario, correoElectronico, telefono, fechaNacimiento, imageName, hash, idGenero, idRol, idLocalidad, idUsuario
-//         ], (error, result) => {
-//             if (error) {
-//                 console.log("Error al actualizar el usuario:", error);
-//                 return res.status(500).json({ error: "Error: intente más tarde" });
-//             }
-//             if (result.affectedRows === 0) {
-//                 return res.status(404).send({ error: "Error: el usuario a modificar no existe" });
-//             }
-//             res.status(200).json({ message: "Usuario actualizado correctamente" });
-
-//             const sqlSelect = "SELECT * FROM usuarios WHERE id_usuario = ?";
-//             db.query(sqlSelect, [idUsuario], (error, result) => {
-//                 if (error) {
-//                     return res.status(500).json({ error: "Error: intente más tarde" });
-//                 }
-//                 const userActualizado = result[0];
-//                 res.json(userActualizado);
-//             });
-//         });
-//     });
-// };
 
 
 
